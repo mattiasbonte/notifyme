@@ -10,15 +10,6 @@ import (
 )
 
 func main() {
-	// Flags
-	var (
-		notificationMessage string
-		notificationType    string
-	)
-	flag.StringVar(&notificationMessage, "m", "", "Notification message")
-	flag.StringVar(&notificationType, "t", "notify", "Notification type (beep, notify, alert)")
-	flag.Parse()
-
 	// Env
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
@@ -28,18 +19,28 @@ func main() {
 		telegramChatID    = os.Getenv("TELEGRAM_CHAT_ID")
 	)
 
+	// Flags
+	var (
+		noPhone             bool
+		notificationType    string
+		notificationMessage string
+	)
+	flag.BoolVar(&noPhone, "n", false, "When passed skips sending phone notification")
+	flag.StringVar(&notificationType, "t", "notify", "System Notification type (beep, notify, alert)")
+	flag.StringVar(&notificationMessage, "m", "Buzzzzr 🛸", "Notification message")
+	flag.Parse()
+
 	// Script
-	if notificationMessage == "" {
-		log.Fatal("error: pass a message with -m flag")
-	}
-
-	if err := gobuzzer.TelegramNotification(telegramAuthToken, telegramChatID, notificationMessage); err != nil {
-		log.Fatalf("error sending telegram message: %v", err)
-	}
-
 	if err := gobuzzer.SystemBuzz(notificationMessage, notificationType); err != nil {
 		log.Fatalf("error sending system notification: %v", err)
 	}
+	log.Println("🔊 System buzzed!")
 
-	log.Println("🛸 notification sent")
+	if !noPhone {
+		if err := gobuzzer.TelegramNotification(telegramAuthToken, telegramChatID, notificationMessage); err != nil {
+			log.Fatalf("error sending telegram message: %v", err)
+		}
+		log.Println("📣 Phone buzzed!")
+	}
+
 }
