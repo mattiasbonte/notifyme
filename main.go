@@ -5,21 +5,22 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
+	"github.com/BurntSushi/toml"
 	"github.com/mattiasbonte/gobuzzer"
 )
 
-func main() {
-	// Env
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	var (
-		telegramAuthToken = os.Getenv("TELEGRAM_AUTH_TOKEN")
-		telegramChatID    = os.Getenv("TELEGRAM_CHAT_ID")
-	)
+type Config struct {
+	Telegram struct {
+		AuthToken string `toml:"auth_token"`
+		ChatID    string `toml:"chat_id"`
+	} `toml:"telegram"`
+}
 
-	// Flags
+func main() {
+	// CONFIG
+	config := loadConfigData()
+
+	// FLAGS
 	var (
 		noPhone             bool
 		notificationType    string
@@ -37,10 +38,24 @@ func main() {
 	log.Println("🔊 System buzzed!")
 
 	if !noPhone {
-		if err := gobuzzer.TelegramNotification(telegramAuthToken, telegramChatID, notificationMessage); err != nil {
+		if err := gobuzzer.TelegramNotification(config.Telegram.AuthToken, config.Telegram.ChatID, notificationMessage); err != nil {
 			log.Fatalf("error sending telegram message: %v", err)
 		}
 		log.Println("📣 Phone buzzed!")
 	}
+}
 
+func loadConfigData() Config {
+	var userConfigPath = os.Getenv("HOME") + "/.config/notifyme/config.toml"
+	if _, err := os.Stat(userConfigPath); os.IsNotExist(err) {
+		log.Fatalf("missing user config file: %v", err)
+	}
+
+	var config = Config{}
+	_, err := toml.DecodeFile(userConfigPath, &config)
+	if err != nil {
+		log.Fatalf("error decoding user config: %v", err)
+	}
+
+	return config
 }

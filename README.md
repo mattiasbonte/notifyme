@@ -4,16 +4,22 @@
 
 ### Installation
 
-- Clone the repo
+- `git clone <repository>`
 - `go mod tidy`
 - `go install`
 
-- Add `.env` file
+- Add `.config/notifyme/config.toml` file
 
-```bash
-TELEGRAM_AUTH_TOKEN=your_telegram_auth_token
-TELEGRAM_CHAT_ID=your_telegram_chat_id
+```toml config.toml
+[telegram]
+  auth_token = "your telegram auth token"
+  chat_id = "your telegram chat id"
+}
 ```
+
+### Help
+
+> `go run main.go --help`
 
 ### Examples
 

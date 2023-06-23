@@ -3,7 +3,7 @@ module github.com/mattiasbonte/notifyme
 go 1.20
 
 require (
-	github.com/joho/godotenv v1.5.1
+	github.com/BurntSushi/toml v1.3.2
 	github.com/mattiasbonte/gobuzzer v0.0.0-20230619204635-f0bd700d7207
 )
 
