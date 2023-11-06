@@ -22,22 +22,30 @@ func main() {
 
 	// FLAGS
 	var (
-		noPhone             bool
+		phone               bool
+		system              bool
 		notificationType    string
 		notificationMessage string
 	)
-	flag.BoolVar(&noPhone, "n", false, "When passed skips sending phone notification")
+	flag.BoolVar(&phone, "p", false, "When passed sends phone notification")
+	flag.BoolVar(&system, "s", false, "When passed sends system notification")
 	flag.StringVar(&notificationType, "t", "notify", "System Notification type (beep, notify, alert)")
 	flag.StringVar(&notificationMessage, "m", "Buzzzzr 🛸", "Notification message")
 	flag.Parse()
 
-	// Script
-	if err := gobuzzer.SystemBuzz(notificationMessage, notificationType); err != nil {
-		log.Fatalf("error sending system notification: %v", err)
+	// SCRIPT
+	if !phone && !system {
+		log.Fatalf("Please specify at least one notification method, see --help")
 	}
-	log.Println("🔊 System buzzed!")
 
-	if !noPhone {
+	if system {
+		if err := gobuzzer.SystemBuzz(notificationMessage, notificationType); err != nil {
+			log.Fatalf("error sending system notification: %v", err)
+		}
+		log.Println("🔊 System buzzed!")
+	}
+
+	if phone {
 		if err := gobuzzer.TelegramNotification(config.Telegram.AuthToken, config.Telegram.ChatID, notificationMessage); err != nil {
 			log.Fatalf("error sending telegram message: %v", err)
 		}
